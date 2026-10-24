@@ -81,12 +81,13 @@ npm test
 
 ## Deploy on GitHub Pages
 
-1. Push this repository to GitHub.
-2. Open **Settings → Pages**.
-3. Under **Build and deployment**, choose **Deploy from a branch**, select your branch (for example `main`) and the `/ (root)` folder, then save.
-4. After a minute the site is live at `https://<user>.github.io/<repo>/`.
+The repo ships with `.github/workflows/pages.yml`, which runs the unit tests and publishes the site on every push to `main` (or manually from the Actions tab).
 
-All paths are relative, so it works from a project sub-path with no configuration.
+1. Push this repository to GitHub.
+2. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
+3. Merge to `main` (or run the workflow manually). The site goes live at `https://<user>.github.io/<repo>/`.
+
+All paths are relative, so it works from a project sub-path with no configuration. If you would rather not use Actions, choose **Deploy from a branch** with the `/ (root)` folder instead.
 
 ## Project layout
 
@@ -108,6 +109,7 @@ js/
   sound.js        Web Audio key clicks
   anim.js         animation helpers
 tests/            unit tests
+.github/workflows/pages.yml   test and deploy to GitHub Pages
 ```
 
 ## Notes
