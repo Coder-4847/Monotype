@@ -247,6 +247,7 @@ export class ConfigBar {
     this.indicator = $('.indicator', this.root);
     this.groups = [...$('#cfg-opts').children];
     this.settings = null;
+    this.mode = null;
     this.swapToken = 0;
 
     this.root.addEventListener('click', (e) => {
@@ -266,7 +267,8 @@ export class ConfigBar {
 
   /** Reflect settings in the buttons; groups for other modes fade out and the right ones in. */
   sync(settings, { animate: animated = true } = {}) {
-    const modeChanged = !this.settings || this.settings.mode !== settings.mode;
+    const modeChanged = this.mode !== settings.mode;
+    this.mode = settings.mode;
     this.settings = settings;
 
     for (const btn of this.root.querySelectorAll('button')) {

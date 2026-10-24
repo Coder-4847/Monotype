@@ -387,7 +387,7 @@ body.blind .letter.incorrect, body.blind .letter.extra { color: var(--fg); }
   padding: min(14vh, 8rem) 1rem 1rem;
   background: var(--scrim);
 }
-.panel { width: min(34rem, 100%); max-height: calc(100dvh - 8rem); display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 0.8rem; overflow: hidden; }
+.panel { width: min(34rem, 100%); max-height: calc(100dvh - min(14vh, 8rem) - 2rem); display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 0.8rem; overflow: hidden; }
 
 .palette-input {
   width: 100%;
@@ -401,7 +401,7 @@ body.blind .letter.incorrect, body.blind .letter.extra { color: var(--fg); }
   border-radius: 0;
 }
 .palette-input::placeholder { color: var(--dim); }
-.palette-list { list-style: none; margin: 0; padding: 0.4rem; overflow-y: auto; overscroll-behavior: contain; }
+.palette-list { list-style: none; margin: 0; padding: 0.4rem; max-height: 24rem; overflow-y: auto; overscroll-behavior: contain; }
 .palette-list li {
   display: flex;
   justify-content: space-between;
