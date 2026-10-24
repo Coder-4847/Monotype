@@ -80,7 +80,12 @@ export function renderResultChart(container, samples, { animated = true } = {}) 
   const height = container.clientHeight;
   if (!width || !height || !samples.length) return;
 
-  const pad = { left: 34, right: 8, top: 10, bottom: 22 };
+  const peak = Math.max(...samples.flatMap((s) => [s.wpm, s.raw]), 1);
+  const yStep = niceStep(peak / 4);
+  const yMax = Math.ceil(peak / yStep) * yStep;
+
+  // Leave room for the widest y label (these are 7px-wide characters at 11px).
+  const pad = { left: Math.max(34, String(Math.round(yMax)).length * 7 + 14), right: 14, top: 10, bottom: 22 };
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
 
@@ -90,10 +95,6 @@ export function renderResultChart(container, samples, { animated = true } = {}) 
   const tMin = samples[0].t;
   const tMax = samples.at(-1).t;
   const [x0, x1] = tMin === tMax ? [tMin - 1, tMax + 1] : [tMin, tMax];
-  const peak = Math.max(...samples.flatMap((s) => [s.wpm, s.raw]), 1);
-  const yStep = niceStep(peak / 4);
-  const yMax = Math.ceil(peak / yStep) * yStep;
-
   const X = (t) => pad.left + ((t - x0) / (x1 - x0)) * plotW;
   const Y = (v) => pad.top + plotH - (v / yMax) * plotH;
 

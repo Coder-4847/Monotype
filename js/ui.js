@@ -68,6 +68,7 @@ export class TestView {
     const word = this.wordEls[engine.index];
     if (!word) return;
     if (!this.lineH) this.lineH = word.offsetHeight;
+    if (!this.lineH) return;
 
     // Keep the active line in the middle of the three visible lines.
     const line = Math.round(word.offsetTop / this.lineH);
@@ -203,7 +204,7 @@ export class TestView {
     const first = this.wordEls[0];
     if (!first) return;
     const h = first.offsetHeight;
-    if (h === this.lineH) return;
+    if (!h || h === this.lineH) return; // 0 means the test view is hidden right now
     this.lineH = h;
     this.line = -1;
     this.flush(true);

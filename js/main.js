@@ -237,7 +237,7 @@ async function finishTest() {
   await fadeOut(testViewEl, { y: -8, duration: 220 });
   if (token !== testToken) return; // a restart got in first
   phase = 'results';
-  if (matchMedia('(pointer: coarse)').matches) input.blur(); // put the mobile keyboard away
+  if (touch.matches) input.blur(); // put the mobile keyboard away
   results.show(result, { ...info, mode: engine.mode, best });
 }
 
@@ -245,8 +245,11 @@ async function finishTest() {
 // Input
 // ---------------------------------------------------------------------------
 
+// On touch devices only a real tap may open the keyboard, so focus is left to the tap itself.
+const touch = matchMedia('(pointer: coarse)');
+
 function focusInput() {
-  if (isOverlayOpen() || testViewEl.hidden) return;
+  if (touch.matches || isOverlayOpen() || testViewEl.hidden) return;
   input.focus({ preventScroll: true });
 }
 
@@ -387,6 +390,11 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) pause
 $('#typing').addEventListener('pointerdown', () => { if (resume()) focusInput(); });
 document.addEventListener('pointerup', (e) => {
   if (!e.target.closest('button, a, input, textarea, .overlay')) focusInput();
+});
+
+// Touching anywhere outside the words brings the hidden UI back (there is no mouse to move on a phone).
+document.addEventListener('pointerdown', (e) => {
+  if (!e.target.closest('#typing')) body.classList.remove('typing');
 });
 
 // Moving the mouse brings the hidden UI back.
