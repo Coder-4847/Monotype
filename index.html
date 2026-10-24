@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Monotype</title>
+  <meta name="description" content="A minimalist typing speed test.">
+  <meta name="theme-color" content="#0e0e0e">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230e0e0e'/%3E%3Cpath d='M8 23V10l4 7 4-7v13M21 10v13' fill='none' stroke='%23f4f4f4' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <!-- Apply the saved theme before first paint so there is no flash. -->
+  <script>
+    try {
+      var s = JSON.parse(localStorage.getItem('monotype.settings'));
+      if (s && (s.theme === 'light' || s.theme === 'dark')) document.documentElement.dataset.theme = s.theme;
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+
+    <header class="top ui-fade">
+      <span></span>
+      <h1 class="wordmark">mono<b>type</b></h1>
+      <nav class="actions" aria-label="Actions">
+        <button class="icon-btn" id="btn-history" type="button" title="History" aria-label="History">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-theme" type="button" title="Toggle theme" aria-label="Toggle theme">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" class="fill"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-palette" type="button" title="Command palette (Esc)" aria-label="Command palette">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7.5l5 4.5-5 4.5M12.5 17H19"/></svg>
+        </button>
+      </nav>
+    </header>
+
+    <main class="stage">
+
+      <!-- ===== Test ===== -->
+      <section class="view" id="test-view" aria-label="Typing test">
+        <div class="config ui-fade" id="config">
+          <div class="cfg-row cfg-modes" role="group" aria-label="Mode">
+            <button type="button" data-mode="time">time</button>
+            <button type="button" data-mode="words">words</button>
+            <button type="button" data-mode="zen">zen</button>
+            <button type="button" data-mode="quote">quote</button>
+            <i class="indicator" aria-hidden="true"></i>
+          </div>
+          <div class="cfg-row cfg-opts" id="cfg-opts">
+            <div class="cfg-group" data-modes="time words">
+              <button type="button" data-toggle="punctuation" aria-pressed="false">punctuation</button>
+              <button type="button" data-toggle="numbers" aria-pressed="false">numbers</button>
+            </div>
+            <div class="cfg-group" data-modes="time words">
+              <button type="button" data-difficulty="common">common 200</button>
+              <button type="button" data-difficulty="top">top 1000</button>
+            </div>
+            <div class="cfg-group" data-modes="time">
+              <button type="button" data-time="15">15</button>
+              <button type="button" data-time="30">30</button>
+              <button type="button" data-time="60">60</button>
+              <button type="button" data-time="120">120</button>
+              <button type="button" data-custom="time">custom</button>
+            </div>
+            <div class="cfg-group" data-modes="words">
+              <button type="button" data-words="10">10</button>
+              <button type="button" data-words="25">25</button>
+              <button type="button" data-words="50">50</button>
+              <button type="button" data-words="100">100</button>
+              <button type="button" data-custom="words">custom</button>
+            </div>
+            <p class="cfg-note" data-modes="zen">free typing &middot; press enter to finish</p>
+            <p class="cfg-note" data-modes="quote">short quotes &middot; scored on accuracy</p>
+          </div>
+        </div>
+
+        <div class="live" id="live" aria-hidden="true">
+          <span class="live-count" id="live-count"></span>
+          <span class="live-wpm" id="live-wpm"></span>
+        </div>
+
+        <div class="typing" id="typing">
+          <div class="viewport" id="viewport">
+            <div class="words" id="words">
+              <div class="caret idle" id="caret"><i></i></div>
+            </div>
+          </div>
+          <textarea class="capture" id="capture" aria-label="Typing input" autocomplete="off" autocapitalize="off"
+                    autocorrect="off" spellcheck="false" rows="1" enterkeyhint="done"></textarea>
+          <p class="notice tap-notice">tap to start</p>
+          <p class="notice pause-notice" id="pause-notice">paused &middot; press any key to continue</p>
+        </div>
+
+        <p class="quote-source" id="quote-source"></p>
+
+        <div class="test-actions ui-fade">
+          <button class="icon-btn" id="btn-restart" type="button" title="Restart (Tab + Enter)" aria-label="Restart test">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.1-5M19 4.5V8h-3.5"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== Results ===== -->
+      <section class="view results" id="results-view" aria-label="Results" hidden>
+        <div class="res-top">
+          <div class="res-main" id="res-main" data-primary="wpm">
+            <div class="stat res-wpm" data-reveal>
+              <span class="label">wpm</span>
+              <span class="big" id="r-wpm">0</span>
+            </div>
+            <div class="stat res-acc" data-reveal>
+              <span class="label">acc</span>
+              <span class="big" id="r-acc">0%</span>
+            </div>
+          </div>
+          <div class="res-chart" id="r-chart" data-reveal></div>
+        </div>
+
+        <p class="res-best" id="r-best" data-reveal></p>
+
+        <dl class="res-grid">
+          <div class="stat" data-reveal><dt class="label">test</dt><dd id="r-test"></dd><dd class="sub" id="r-test-sub"></dd></div>
+          <div class="stat" data-reveal><dt class="label">raw</dt><dd id="r-raw">0</dd></div>
+          <div class="stat" data-reveal>
+            <dt class="label">characters</dt>
+            <dd class="chars"><span id="r-c-correct">0</span>/<span class="bad" id="r-c-incorrect">0</span>/<span class="bad" id="r-c-extra">0</span>/<span id="r-c-missed">0</span></dd>
+            <dd class="sub">correct / incorrect / extra / missed</dd>
+          </div>
+          <div class="stat" data-reveal><dt class="label">consistency</dt><dd id="r-cons">0%</dd></div>
+          <div class="stat" data-reveal><dt class="label">time</dt><dd id="r-time">0s</dd></div>
+        </dl>
+
+        <div class="res-actions" data-reveal>
+          <button class="btn primary" id="btn-next" type="button">next test</button>
+          <button class="btn" id="btn-repeat" type="button">repeat same words</button>
+          <button class="btn" id="btn-restart-2" type="button">restart</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bottom ui-fade">
+      <p class="hints">
+        <span><kbd>tab</kbd> + <kbd>enter</kbd> restart</span>
+        <span><kbd>esc</kbd> commands</span>
+      </p>
+      <div class="toggles">
+        <button type="button" data-setting="liveWpm">live wpm <em></em></button>
+        <button type="button" data-setting="blind">blind <em></em></button>
+        <button type="button" data-setting="sound">sound <em></em></button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ===== Command palette ===== -->
+  <div class="overlay" id="palette" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
+    <div class="panel palette-panel">
+      <input class="palette-input" id="palette-input" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Type a command" aria-label="Command">
+      <ul class="palette-list" id="palette-list" role="listbox"></ul>
+      <p class="palette-hint" id="palette-hint"></p>
+    </div>
+  </div>
+
+  <!-- ===== History ===== -->
+  <div class="overlay" id="history" role="dialog" aria-modal="true" aria-label="History" hidden>
+    <div class="panel history-panel">
+      <header class="history-head">
+        <h2>history</h2>
+        <button class="icon-btn" id="history-close" type="button" aria-label="Close history">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+        </button>
+      </header>
+      <div class="history-summary" id="history-summary"></div>
+      <div class="history-chart" id="history-chart"></div>
+      <ol class="history-list" id="history-list" tabindex="0"></ol>
+      <footer class="history-foot">
+        <button type="button" class="link-btn" id="history-clear">clear history</button>
+      </footer>
+    </div>
+  </div>
+
+  <noscript><p class="noscript">Monotype needs JavaScript to run.</p></noscript>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

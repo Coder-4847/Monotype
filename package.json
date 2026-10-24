@@ -1,0 +1,12 @@
+{
+  "name": "monotype",
+  "version": "1.0.0",
+  "description": "A minimalist typing speed test. Vanilla HTML, CSS and JS.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "start": "python3 -m http.server 8080"
+  },
+  "license": "MIT"
+}
