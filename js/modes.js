@@ -69,7 +69,8 @@ export function createWordSource(cfg, rng = Math.random) {
 let lastQuote = -1;
 
 /** Everything the engine needs to run one test. `cfg` is kept so a test can be repeated. */
-export function createTest(cfg, rng = Math.random) {
+export function createTest(settings, rng = Math.random) {
+  const cfg = { ...settings }; // a snapshot: later setting changes must not alter this test
   switch (cfg.mode) {
     case 'time': {
       const source = createWordSource(cfg, rng);

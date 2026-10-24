@@ -34,7 +34,7 @@ export function fadeIn(el, { y = 8, duration = 260, delay = 0 } = {}) {
   return animate(el, [
     { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
     { opacity: 1, transform: 'translate3d(0, 0, 0)' },
-  ], { duration, delay });
+  ], { duration, delay, fill: 'backwards' }); // backwards: stay hidden while a delay runs
 }
 
 /** Fade an element out and hide it. If interrupted it is left alone. */

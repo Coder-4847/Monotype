@@ -1,12 +1,14 @@
 // Wiring: settings, input handling, and the ready -> running -> results flow.
 
 import { TypingTest } from './engine.js';
-import { createTest, repeatTest, clampCustom, LIMITS, PRESETS } from './modes.js';
-import { loadSettings, saveSettings } from './storage.js';
+import { createTest, repeatTest, clampCustom, describeTest, bestKey, LIMITS, PRESETS } from './modes.js';
+import { loadSettings, saveSettings, addHistory, recordBest } from './storage.js';
 import { TestView, LiveStats, ConfigBar, refreshWords } from './ui.js';
 import { fadeIn, fadeOut, reducedMotion } from './anim.js';
 import { isOverlayOpen } from './overlay.js';
 import { createPalette } from './palette.js';
+import { ResultsView } from './results.js';
+import { createHistory } from './history.js';
 import { playClick, setSoundEnabled } from './sound.js';
 
 const $ = (sel) => document.querySelector(sel);
@@ -24,6 +26,8 @@ const config = new ConfigBar({
   onCustom: (kind) => askCustom(kind),
 });
 const palette = createPalette({ getCommands: () => commands(), onClose: () => focusInput() });
+const results = new ResultsView();
+const history = createHistory({ onClose: () => focusInput() });
 
 /** 'ready' (waiting for the first key) | 'running' | 'transition' | 'results' */
 let phase = 'ready';
@@ -126,6 +130,7 @@ function commands() {
   add('toggle blind mode', 'display', () => set('blind', !settings.blind), () => settings.blind, 'hide errors');
   add('toggle key sound', 'display', () => set('sound', !settings.sound), () => settings.sound, 'click audio');
 
+  add('show history', 'view', () => history.open(), null, 'results progress past');
   add('restart test', 'test', () => newTest(), null, 'new words');
   add('repeat same words', 'test', () => newTest({ repeat: true }), null, 'again');
   return out;
@@ -148,6 +153,8 @@ async function newTest({ repeat = false } = {}) {
   phase = fromResults ? 'transition' : 'ready';
 
   if (fromResults) {
+    await results.hide();
+    if (token !== testToken) return;
     testViewEl.hidden = false;
     view.setTest(engine);
     renderMeta();
@@ -200,16 +207,38 @@ function stopTicker() {
   tickFrame = 0;
 }
 
+const round = (n) => Math.round(n * 100) / 100;
+
 async function finishTest() {
   if (phase !== 'running' && phase !== 'ready') return;
   phase = 'transition';
+  const token = testToken;
   stopTicker();
   engine.finish();
   view.flush();
   body.classList.remove('typing');
   live.show(false);
+
+  const result = engine.result();
+  const info = describeTest(desc.cfg, desc.quote);
+  const entry = {
+    date: Date.now(),
+    mode: engine.mode,
+    label: info.title,
+    wpm: round(result.wpm),
+    raw: round(result.raw),
+    accuracy: round(result.accuracy),
+    consistency: round(result.consistency),
+    duration: round(result.duration),
+  };
+  const best = recordBest(bestKey(desc.cfg), engine.mode, entry);
+  if (result.keys > 0) addHistory(entry);
+
   await fadeOut(testViewEl, { y: -8, duration: 220 });
+  if (token !== testToken) return; // a restart got in first
   phase = 'results';
+  if (matchMedia('(pointer: coarse)').matches) input.blur(); // put the mobile keyboard away
+  results.show(result, { ...info, mode: engine.mode, best });
 }
 
 // ---------------------------------------------------------------------------
@@ -372,6 +401,7 @@ document.addEventListener('mousemove', (e) => {
 // Buttons & start-up
 // ---------------------------------------------------------------------------
 
+$('#btn-history').addEventListener('click', () => history.open());
 $('#btn-palette').addEventListener('click', () => palette.open());
 $('#btn-theme').addEventListener('click', () => set('theme', settings.theme === 'dark' ? 'light' : 'dark'));
 $('#btn-restart').addEventListener('click', () => { newTest(); });

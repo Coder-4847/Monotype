@@ -355,8 +355,9 @@ body.blind .letter.incorrect, body.blind .letter.extra { color: var(--fg); }
 .chart .line-wpm { stroke: var(--fg); stroke-width: 2; }
 .chart .line-raw { stroke: var(--sub); stroke-width: 1.5; opacity: 0.55; }
 .chart .dot-wpm { fill: var(--fg); }
+.chart .dot-raw { fill: var(--sub); }
 .chart .dot-err { fill: var(--err); }
-.chart .hairline { stroke: var(--sub); stroke-width: 1; opacity: 0.5; }
+.chart .hairline { stroke: var(--sub); stroke-width: 1; }
 .chart .focus-dot { fill: var(--bg); stroke: var(--fg); stroke-width: 2; }
 .chart-tip {
   position: absolute;
@@ -426,7 +427,7 @@ body.blind .letter.incorrect, body.blind .letter.extra { color: var(--fg); }
 .history-head { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 1rem 0.2rem 1.5rem; }
 .history-head h2 { font-size: 0.9rem; font-weight: 400; color: var(--sub); }
 .history-summary { display: flex; gap: 2rem; padding: 0.5rem 1.5rem 0; }
-.history-summary .stat dd { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.history-summary .val { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
 .history-chart { position: relative; height: 5.5rem; margin: 1rem 1.5rem 0.5rem; flex: none; }
 .history-list { list-style: none; margin: 0; padding: 0.25rem 0.75rem; overflow-y: auto; overscroll-behavior: contain; min-height: 3rem; font-size: 0.85rem; font-variant-numeric: tabular-nums; outline: none; }
 .history-list li { display: grid; grid-template-columns: 1fr 1.2fr 4.5rem 4rem; gap: 0.5rem; padding: 0.4rem 0.75rem; border-radius: 0.4rem; color: var(--sub); }

@@ -5,13 +5,11 @@ import { animate, EASE } from './anim.js';
 
 const app = document.querySelector('.app');
 let current = null;
-let token = 0;
 
 export const isOverlayOpen = () => current !== null;
 
 export async function openOverlay(el, { onOpen, onClose } = {}) {
   if (current) await closeOverlay();
-  token++; // supersedes any close still animating
   current = { el, onClose };
   app.inert = true;
   el.hidden = false;
@@ -28,7 +26,6 @@ export async function closeOverlay() {
   if (!current) return;
   const { el, onClose } = current;
   current = null;
-  const mine = ++token;
   app.inert = false;
   const panel = el.querySelector('.panel');
   animate(panel, [
@@ -36,7 +33,8 @@ export async function closeOverlay() {
     { opacity: 0, transform: 'translate3d(0, -6px, 0) scale(0.99)' },
   ], { duration: 140, fill: 'forwards' });
   const anim = await animate(el, [{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: 'forwards' });
-  if (token === mine && anim) {
+  // `anim` is null if this overlay was reopened meanwhile; skip hiding if another one took over.
+  if (anim && current?.el !== el) {
     el.hidden = true;
     anim.cancel();
     panel.getAnimations().forEach((a) => a.cancel());
@@ -48,6 +46,7 @@ export async function closeOverlay() {
 document.addEventListener('keydown', (e) => {
   if (current && e.key === 'Escape') {
     e.preventDefault();
+    e.stopImmediatePropagation(); // otherwise the same Esc would reopen the palette
     closeOverlay();
   }
 }, true);
